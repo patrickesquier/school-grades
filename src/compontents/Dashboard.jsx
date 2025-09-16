@@ -1,13 +1,13 @@
 import React from 'react';
 import { Title } from './Title';
 
-export function Dashboard({ user, handleLogout, isAdmin, professors, students, subjects, classes, selectedClass, setSelectedClass, gradeData, setGradeData, handleAddGrade, grades, loginError, getGradeDisplayData, filteredStudents, groupedGrades }) {
+export function Dashboard({ user, handleLogout, isAdmin, professors, students, subjects, classes, selectedClass, setSelectedClass, gradeData, setGradeData, handleAddGrade, latestGrades, loginError, getGradeDisplayData, filteredStudents, groupedGrades }) {
     const userName = professors.find(p => p.email === user.email)?.name || 'Professor(a)';
-    
+
     return (
         <div className="bg-gray-100 min-h-screen p-2 sm:p-4 font-sans">
             <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-                <Title userName={userName} userUid={user.uid} handleLogout={handleLogout}/>
+                <Title userName={userName} userUid={user.uid} handleLogout={handleLogout} />
 
                 {!isAdmin && (
                     <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200">
@@ -110,17 +110,17 @@ export function Dashboard({ user, handleLogout, isAdmin, professors, students, s
                                     step="0.1"
                                 />
                             </div>
-                            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md text-sm">
+                            <button type="submit" className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md text-sm">
                                 Adicionar Nota
                             </button>
                             {loginError && <p className="text-sm text-red-500 mt-4 text-center">{loginError}</p>}
                         </form>
                     </div>
                 )}
-                
+
                 <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200">
                     <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Notas Lançadas</h2>
-                    {grades.length === 0 ? (
+                    {latestGrades.length === 0 ? (
                         <p className="text-center text-gray-500 italic text-sm">Nenhuma nota lançada ainda.</p>
                     ) : (
                         <div className="overflow-x-auto">
@@ -138,7 +138,7 @@ export function Dashboard({ user, handleLogout, isAdmin, professors, students, s
                                     </tr>
                                 </thead>
                                 <tbody className="text-gray-600 text-xs sm:text-sm font-light">
-                                    {grades.filter(grade => isAdmin || grade.teacherId === user.uid).map(grade => {
+                                    {latestGrades.filter(grade => isAdmin || grade.teacherId === user.uid).map(grade => {
                                         const displayData = getGradeDisplayData(grade);
                                         return (
                                             <tr key={grade.id} className="border-b border-gray-200 hover:bg-gray-100">
@@ -159,7 +159,7 @@ export function Dashboard({ user, handleLogout, isAdmin, professors, students, s
                     )}
                 </div>
 
-                {isAdmin && grades.length > 0 && (
+                {isAdmin && latestGrades.length > 0 && (
                     <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200">
                         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Relatório de Notas Completo</h2>
                         <div className="space-y-4 sm:space-y-6">

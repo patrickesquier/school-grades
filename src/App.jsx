@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { collection, addDoc, onSnapshot, query, where } from 'firebase/firestore';
 
-import { Login } from './compontents/Login'; 
-import { Dashboard } from './compontents/Dashboard'; 
-import { Loading } from './compontents/Loading'; 
-import { appId, auth, db} from './firebase/config'
+import { Login } from './compontents/Login';
+import { Dashboard } from './compontents/Dashboard';
+import { Loading } from './compontents/Loading';
+import { appId, auth, db } from './firebase/config';
 
 
 const App = () => {
@@ -121,11 +121,11 @@ const App = () => {
             setLoginError("As notas devem ser valores numéricos entre 0 e 10.");
             return;
         }
-        
+
         const student = students.find(s => s.id === studentId)?.name;
         const subject = subjects.find(s => s.id === subjectId)?.name;
         const className = classes.find(c => c.name === selectedClass)?.name || selectedClass;
-        
+
         if (!student || !subject) {
             setLoginError("Aluno ou matéria não encontrados. Por favor, tente novamente.");
             return;
@@ -147,7 +147,7 @@ const App = () => {
                 teacherEmail: user.email,
                 createdAt: new Date().toISOString()
             };
-            
+
             await addDoc(gradesRef, newGradeData);
 
             setGradeData({ studentId: '', subjectId: '', unit: '', ac: '', p1: '', p2: '' });
@@ -177,10 +177,20 @@ const App = () => {
             teacherName: teacher ? teacher.name : 'Desconhecido'
         };
     };
-    
+
+    const latestGrades = grades.reduce((acc, currentGrade) => {
+        const key = `${currentGrade.studentId}-${currentGrade.subjectId}-${currentGrade.unit}-${currentGrade.className}`;
+        if (!acc[key] || new Date(currentGrade.createdAt) > new Date(acc[key].createdAt)) {
+            acc[key] = currentGrade;
+        }
+        return acc;
+    }, {});
+
+    const latestGradesArray = Object.values(latestGrades);
+
     const filteredStudents = students.filter(student => student.class === selectedClass).sort((a, b) => a.name.localeCompare(b.name));
-    
-    const groupedGrades = grades.reduce((acc, grade) => {
+
+    const groupedGrades = latestGradesArray.reduce((acc, grade) => {
         const className = grade.className;
         const unit = grade.unit;
 
@@ -194,7 +204,7 @@ const App = () => {
         return acc;
     }, {});
 
-    if (loading) <Loading />
+    if (loading) return <Loading />;
 
     if (!user) {
         return <Login
@@ -222,7 +232,7 @@ const App = () => {
             gradeData={gradeData}
             setGradeData={setGradeData}
             handleAddGrade={handleAddGrade}
-            grades={grades}
+            latestGrades={latestGradesArray}
             loginError={loginError}
             getGradeDisplayData={getGradeDisplayData}
             filteredStudents={filteredStudents}
